@@ -6,7 +6,7 @@ Nikolai Kochkin (urfiner@gmail.com)
 
 Description: 
 That JS script generates *.reg file from it's description.
-I use it to generate reg keys from descriptions saved in a text format. 
+I use it to generate registry keys files from descriptions saved in a text format. 
 
 Usage:
 createRegFile(
