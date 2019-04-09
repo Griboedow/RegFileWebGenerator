@@ -1,4 +1,42 @@
-/* Save registry key */
+function createRegFile(keyName, keyType, keyPath, KeyValue, keyDescription = ''){
+    var targetText = 'Windows Registry Editor Version 5.00\r\n\r\n';
+    targetText += '[' + keyPath + ']' + '\r\n';
+    targetText += ';' + keyDescription.replace(/(\r\n\t|\n|\r\t)/gm,"") + '\r\n' ;
+    
+    switch(keyType){
+        case 'reg_sz':
+            targetText += "\"" + keyName + '"=' + "\"" + KeyValue + "\"";
+            break;
+        case 'dword':
+            targetText += "\"" + keyName + '"=' + keyType + ':' + decimalToHexString(parseInt(KeyValue, 10));
+            break;
+        case 'qword':
+            targetText += "\"" + keyName + '"=' + "hex(b):" + formatQwordByteString(decimalToHexString(parseInt(KeyValue, 10)));
+            break;
+        case 'reg_multi_sz':
+            targetText += "\"" + keyName + '"=' + "hex(7):" + encodeRegMultiSz(KeyValue, keyType) ;
+            break;
+        case 'reg_expand_sz':
+            targetText += "\"" + keyName + '"=' + "hex(2):" + encodeRegMultiSz(KeyValue, keyType) ;
+            break;
+        case 'reg_binary':
+            targetText += "\"" + keyName + '"=' + "hex:" + encodeRegMultiSz(KeyValue, keyType) ;
+            break;
+        default:
+            targetText = "\"" + keyName + '"=' + keyType + ':' + KeyValue ;
+            break;
+    }
+    var a_fake = window.document.createElement('a');
+    a_fake.href = window.URL.createObjectURL(new Blob([targetText], {type: 'text/csv'}));
+    a_fake.download = '' + keyName + '=' + KeyValue.replace(/[^a-zA-Z0-9]/g,'_') + '.reg';
+    
+    // Append anchor to body.
+    document.body.appendChild(a_fake);
+    a_fake.click();
+    // Remove anchor from body
+    document.body.removeChild(a_fake);
+}
+
 function encodeRegMultiSz(input, keyType) {
         var codePoint;
 		var length = input.length;
@@ -50,43 +88,4 @@ function formatQwordByteString(hexString){
 	  resultString = resultString + ",00";
 	}
 	return resultString;
-}
-
-function createRegFile(keyName, keyType, keyPath, KeyValue, keyDescription = ''){
-    var targetText = 'Windows Registry Editor Version 5.00\r\n\r\n';
-    targetText += '[' + keyPath + ']' + '\r\n';
-    targetText += ';' + keyDescription.replace(/(\r\n\t|\n|\r\t)/gm,"") + '\r\n' ;
-    
-    switch(keyType){
-        case 'reg_sz':
-            targetText += "\"" + keyName + '"=' + "\"" + KeyValue + "\"";
-            break;
-        case 'dword':
-            targetText += "\"" + keyName + '"=' + keyType + ':' + decimalToHexString(parseInt(KeyValue, 10));
-            break;
-        case 'qword':
-            targetText += "\"" + keyName + '"=' + "hex(b):" + formatQwordByteString(decimalToHexString(parseInt(KeyValue, 10)));
-            break;
-        case 'reg_multi_sz':
-            targetText += "\"" + keyName + '"=' + "hex(7):" + encodeRegMultiSz(KeyValue, keyType) ;
-            break;
-        case 'reg_expand_sz':
-            targetText += "\"" + keyName + '"=' + "hex(2):" + encodeRegMultiSz(KeyValue, keyType) ;
-            break;
-        case 'reg_binary':
-            targetText += "\"" + keyName + '"=' + "hex:" + encodeRegMultiSz(KeyValue, keyType) ;
-            break;
-        default:
-            targetText = "\"" + keyName + '"=' + keyType + ':' + KeyValue ;
-            break;
-    }
-    var a_fake = window.document.createElement('a');
-    a_fake.href = window.URL.createObjectURL(new Blob([targetText], {type: 'text/csv'}));
-    a_fake.download = '' + keyName + '=' + KeyValue.replace(/[^a-zA-Z0-9]/g,'_') + '.reg';
-    
-    // Append anchor to body.
-    document.body.appendChild(a_fake);
-    a_fake.click();
-    // Remove anchor from body
-    document.body.removeChild(a_fake);
 }
