@@ -18,4 +18,4 @@ createRegFile(
     );
 
 
-
+Use ";" instead of line break for REG_MULTI_SZ.
